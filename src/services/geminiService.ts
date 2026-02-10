@@ -4,9 +4,16 @@ import { GoogleGenAI } from "@google/genai";
 export class GeminiService {
   private ai: GoogleGenAI;
 
-  constructor() {
-    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+ constructor() {
+  this.ai = new GoogleGenAI({
+    apiKey: import.meta.env.VITE_API_KEY || "",
+  });
+
+  if (!import.meta.env.VITE_API_KEY) {
+    console.warn("⚠️ VITE_API_KEY is missing in environment variables");
   }
+}
+
 
   async removeBackground(base64Image: string): Promise<string> {
     const response = await this.ai.models.generateContent({
