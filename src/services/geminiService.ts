@@ -1,43 +1,45 @@
-
 import { GoogleGenAI } from "@google/genai";
 
 export class GeminiService {
   private ai: GoogleGenAI;
 
- constructor() {
-  this.ai = new GoogleGenAI({
-    apiKey: import.meta.env.VITE_API_KEY || "",
-  });
+  constructor() {
+    this.ai = new GoogleGenAI({
+      apiKey: import.meta.env.VITE_API_KEY || "",
+    });
 
-  if (!import.meta.env.VITE_API_KEY) {
-    console.warn("⚠️ VITE_API_KEY is missing in environment variables");
+    if (!import.meta.env.VITE_API_KEY) {
+      console.warn("⚠️ VITE_API_KEY is missing in environment variables");
+    }
   }
-}
-
 
   async removeBackground(base64Image: string): Promise<string> {
     const response = await this.ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
+      model: "gemini-2.5-flash-image",
       contents: {
         parts: [
           {
             inlineData: {
-              data: base64Image.split(',')[1],
-              mimeType: 'image/png',
+              data: base64Image.split(",")[1],
+              mimeType: "image/png",
             },
           },
           {
-            text: `Extract the main product from this image and place it on a pure, solid white background (#FFFFFF). 
-                   The product must be clean, sharp, and centered. Do not add any extra text or graphics. 
-                   Return only the product on white.`,
+            text: `
+Extract the main product from this image and place it on a pure solid white background (#FFFFFF).
+The product must be clean, sharp, and centered.
+Do not add any extra text, shadows, borders, or graphics.
+Return only the product on white background.
+            `,
           },
         ],
       },
     });
 
-    let resultBase64 = '';
+    let resultBase64 = "";
+
     for (const part of response.candidates?.[0]?.content?.parts || []) {
-      if (part.inlineData) {
+      if (part.inlineData?.data) {
         resultBase64 = `data:image/png;base64,${part.inlineData.data}`;
         break;
       }
